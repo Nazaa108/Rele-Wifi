@@ -45,6 +45,11 @@ int releDos;
 int releTres;
 int releCuatro;
 
+////////////////////////////////////////////// Variable control de la contraseña
+
+bool Ptry = true; //Controla si es el primer intento o no
+bool pass = false; //Controla si la puso correctamente
+
 ////////////////////////////////////////////// Conexion wifi
 
 void setup() {
@@ -87,11 +92,14 @@ void teclado(int64_t chatId){
 
   CTBotInlineKeyboard t1;
   t1.addRow();
-  t1.addButton("Rele 1", "1on", CTBotKeyboardButtonQuery);
-  t1.addButton("Rele 2", "2on", CTBotKeyboardButtonQuery);
-  t1.addButton("Rele 3", "3on", CTBotKeyboardButtonQuery);
-  t1.addButton("Rele 4", "4on", CTBotKeyboardButtonQuery);
-  miBot.sendMessage(chatId, "Que rele quiere prender?", t1);
+  t1.addButton("Frente", "1on", CTBotKeyboardButtonQuery);
+  t1.addRow();
+  t1.addButton("Living", "2on", CTBotKeyboardButtonQuery);
+  t1.addRow();
+  t1.addButton("Cocina", "3on", CTBotKeyboardButtonQuery);
+  t1.addRow();
+  t1.addButton("Pasillo", "4on", CTBotKeyboardButtonQuery);
+  miBot.sendMessage(chatId, "Que luz quiere prender?", t1);
 }
 
 //////////////////////////////////////////////
@@ -134,18 +142,35 @@ void loop() {
 
   //////////////////////////////////////////////
 
-  ////////////////////////////////////////////// Detecta si el usuario pide el teclado
+  ////////////////////////////////////////////// Contraseña
 
-  if (miBot.getNewMessage(msg)) {
+  if (miBot.getNewMessage(msg)) { //Si recive mensaje
     if (msg.messageType == CTBotMessageText) {
-      if (msg.text.equalsIgnoreCase("rominabe")) {
-        int64_t chatId = msg.sender.id;
-        teclado(chatId);
+
+      if (msg.text.equalsIgnoreCase("rominabe") && pass == false) { //si el primer mensaje es la contraseña, pasas
+        miBot.sendMessage(msg.sender.id, "Contraseña correcta, pruebe 'menu' para mas opciones");
+        pass = true;
       }
-      else {
-        miBot.sendMessage(msg.sender.id, "ingresar contraseña:");
+
+      else if (pass == false && Ptry == true) { //si el primer mensaje no es la contraseña, te la pide
+        miBot.sendMessage(msg.sender.id, "Escriba la contraseña:");
+        Ptry = false;
       }
-    } 
+
+      else if (pass == false && Ptry == false) {//si un mensaje no es la contraseña, te dice que es incorrecta
+        miBot.sendMessage(msg.sender.id, "Contraseña incorrecta, intente de nuevo");
+      }
+
+      else if (pass == true && msg.text.equalsIgnoreCase("menu")) { //si pide el menu, manda el menu
+        teclado(msg.sender.id);
+        return;
+      }
+
+      else if(pass == true){//si ya habia puesto la contraseña y manda algo que no sea menu, le pide que pida el menu
+        miBot.sendMessage(msg.sender.id, "Pruebe 'menu' para mas opciones");
+      }
+    }
+
     ////////////////////////////////////////////// Detecta la interaccion del usuario y actua
 
     else if (msg.messageType == CTBotMessageQuery) {
@@ -157,13 +182,13 @@ void loop() {
         if(releUno == 0){ // Si el rele esta apagado
           Serial.println(" Encender");
           digitalWrite(rUno, HIGH); // Lo prende
-          miBot.endQuery(msg.callbackQueryID, "Rele Encendido", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true); // \u2705 es el codigo del emoji "✅" por si falla puedo poner ese codigo
         }
 
         else if(releUno == 1){ // Si ya estaba prendido
           Serial.println(" Apagar");
           digitalWrite(rUno, LOW); // Lo apaga
-          miBot.endQuery(msg.callbackQueryID, "Rele apagado", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
       }
 
@@ -173,13 +198,13 @@ void loop() {
         if(releDos == 0){
           Serial.println(" Endender");
           digitalWrite(rDos, HIGH);
-          miBot.endQuery(msg.callbackQueryID, "Rele Encendido", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
 
         if(releDos == 1){
           Serial.println(" Apagar");
           digitalWrite(rDos, LOW);
-          miBot.endQuery(msg.callbackQueryID, "Rele apagado", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
       }
 
@@ -189,13 +214,13 @@ void loop() {
         if(releTres == 0){
           Serial.println(" Endender");
           digitalWrite(rTres, HIGH);
-          miBot.endQuery(msg.callbackQueryID, "Rele Encendido", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
 
         else if(releTres == 1){
           Serial.println(" Apagar");
           digitalWrite(rTres, LOW);
-          miBot.endQuery(msg.callbackQueryID, "Rele Apagado", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
       }
 
@@ -205,13 +230,13 @@ void loop() {
         if(releCuatro == 0){
           Serial.println(" Endender");
           digitalWrite(rCuatro, HIGH);
-          miBot.endQuery(msg.callbackQueryID, "Rele Encendido", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
 
         else if(releCuatro == 1){
           Serial.println(" Apagar");
           digitalWrite(rCuatro, LOW);
-          miBot.endQuery(msg.callbackQueryID, "Rele Apagado", true);
+          miBot.endQuery(msg.callbackQueryID, "Rele activado ✅", true);
         }
       }
     }
